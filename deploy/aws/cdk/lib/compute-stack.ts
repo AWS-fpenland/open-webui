@@ -13,8 +13,8 @@ import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import { Construct } from 'constructs';
-import { BedrockAccess } from './constructs/bedrock-access';
-import { BedrockConfig, FeatureFlags, ImageConfig } from './config';
+import { AgentCoreFullAccess } from './constructs/agentcore-access';
+import { BedrockConfig, ImageConfig } from './config';
 
 export interface CognitoWiring {
   userPool: cognito.UserPool;
@@ -35,7 +35,6 @@ export interface ComputeStackProps extends cdk.StackProps {
   /** Absolute path to the build context (repo root w/ Dockerfile) for image.source='build'. */
   buildContext: string;
   bedrock: BedrockConfig;
-  features: FeatureFlags;
   websocketEnabled: boolean;
 
   /** Present only when auth.mode='cognito'. */
@@ -132,19 +131,14 @@ export class ComputeStack extends cdk.Stack {
       resources: ['*'],
     }));
 
-    if (props.bedrock.enabled) {
-      const bedrockAccess = new BedrockAccess(this, 'BedrockAccess', { allowedModels: props.bedrock.allowedModels });
-      bedrockAccess.policyStatements.forEach((s) => taskRole.addToPolicy(s));
-    }
-
-    // Opt-in: allow opening native bidirectional WebSocket terminals to
-    // AgentCore runtimes (downstream fork feature; not needed by vanilla OWUI).
-    if (props.features.agentcoreWebsocket) {
-      taskRole.addToPolicy(new iam.PolicyStatement({
-        actions: ['bedrock-agentcore:InvokeAgentRuntimeWithWebSocketStream'],
-        resources: ['*'],
-      }));
-    }
+    // Full access to Bedrock, Bedrock AgentCore, and Bedrock Mantle, granted
+    // UNCONDITIONALLY to every deployment path (all modes, all environments).
+    // `bedrock-agentcore:*` covers both the data plane (InvokeAgentRuntime,
+    // InvokeAgentRuntimeWithWebSocketStream, gateway/browser/code-interpreter/
+    // memory invoke) and the control plane, so it subsumes the previous narrow
+    // bedrock.enabled grant and the agentcoreWebsocket feature grant.
+    const bedrockAccess = new AgentCoreFullAccess(this, 'BedrockAgentCoreAccess');
+    bedrockAccess.policyStatements.forEach((s) => taskRole.addToPolicy(s));
 
     // ── Cognito client secret (only when SSO is enabled) ──
     // Seed it from the user-pool client's generated secret at deploy time so

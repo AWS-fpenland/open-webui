@@ -11,9 +11,6 @@
     "allowedModels": []
   },
   "websocket": { "enabled": true },
-  "features": {
-    "agentcoreWebsocket": false
-  },
   "environments": {
     "default": {
       "fargateCpu": 2048,

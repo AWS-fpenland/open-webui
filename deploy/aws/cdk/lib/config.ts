@@ -61,16 +61,6 @@ export interface WebSocketConfig {
   enabled: boolean;
 }
 
-export interface FeatureFlags {
-  /**
-   * Off by default. When true, grants the task role
-   * bedrock-agentcore:InvokeAgentRuntimeWithWebSocketStream so a downstream
-   * fork (e.g. the in-chat terminal) can open native WebSocket terminals to
-   * AgentCore runtimes. Vanilla Open WebUI does not need this.
-   */
-  agentcoreWebsocket?: boolean;
-}
-
 export interface EnvironmentConfig {
   /** Custom domain (e.g. "oui.example.com"). Omit to use the CloudFront default *.cloudfront.net domain. */
   domainName?: string;
@@ -139,7 +129,6 @@ export interface DeployConfig {
   auth: AuthConfig;
   bedrock: BedrockConfig;
   websocket: WebSocketConfig;
-  features: FeatureFlags;
 
   /** Map of environment name → its config. For a one-click single deploy, use a single entry (e.g. "default"). */
   environments: Record<string, EnvironmentConfig>;
@@ -160,7 +149,6 @@ const DEFAULTS: DeployConfig = {
   auth: { mode: 'none' },
   bedrock: { enabled: false },
   websocket: { enabled: true },
-  features: {},
   environments: {
     default: {
       fargateCpu: 1024,
@@ -261,9 +249,6 @@ export function loadConfig(app: cdk.App, cdkRoot: string): DeployConfig {
 
   const websocketEnabled = ctxBool(app, 'websocketEnabled');
   if (websocketEnabled !== undefined) config.websocket.enabled = websocketEnabled;
-
-  const agentcoreWs = ctxBool(app, 'agentcoreWebsocket');
-  if (agentcoreWs !== undefined) config.features.agentcoreWebsocket = agentcoreWs;
 
   // Pipeline toggles + wiring via context (so you can stand up a pipeline without a config file).
   const pipelineEnabled = ctxBool(app, 'pipeline');

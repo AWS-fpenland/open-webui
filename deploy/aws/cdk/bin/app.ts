@@ -81,7 +81,6 @@ function deployEnvironment(envName: string, envConfig: EnvironmentConfig): void 
     image: config.image,
     buildContext: config.image.buildContext ? path.resolve(config.image.buildContext) : repoRoot,
     bedrock: config.bedrock,
-    features: config.features,
     websocketEnabled: config.websocket.enabled,
     cognito: cognitoWiring,
     domainName: envConfig.domainName,

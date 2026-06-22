@@ -42,10 +42,6 @@ If no `configFile` is given, `config/defaults.json` is loaded automatically when
     "enabled": true                 // native WebSocket over the VPC origin + Redis Socket.IO manager
   },
 
-  "features": {
-    "agentcoreWebsocket": false     // opt-in IAM for AgentCore WebSocket terminals (fork feature)
-  },
-
   "environments": {                 // one entry = single env; multiple = multi-env (pipeline)
     "default": {
       "domainName": null,           // e.g. "oui.example.com" (requires certificateArn)
@@ -95,7 +91,6 @@ Common knobs are exposed as context keys so you can override without a file:
 | `-c authMode=` | `auth.mode` |
 | `-c bedrockEnabled=true` | `bedrock.enabled` |
 | `-c websocketEnabled=` | `websocket.enabled` |
-| `-c agentcoreWebsocket=true` | `features.agentcoreWebsocket` |
 | `-c environment=NAME` | select a single env to synth/deploy |
 | `-c domainName=` / `-c certificateArn=` | override the selected env's domain/cert |
 | `-c pipeline=true` | `pipeline.enabled` |
@@ -115,6 +110,20 @@ The compute stack wires these into the task automatically:
 | `ENABLE_WEBSOCKET_SUPPORT` | `websocket.enabled` |
 | `ENABLE_BEDROCK_API`, `BEDROCK_REGION` | when `bedrock.enabled` |
 | `OAUTH_*`, `OPENID_*`, `OAUTH_CLIENT_SECRET` | when `auth.mode=cognito` |
+
+## Task-role IAM
+
+The ECS task role is granted, on **every** deployment path (all modes, all environments):
+
+| Statement | Covers |
+|---|---|
+| `bedrock:*` | Bedrock runtime (InvokeModel / Converse / streaming) **and** control plane |
+| `bedrock-agentcore:*` | AgentCore data plane (InvokeAgentRuntime, WebSocket stream, gateway/browser/code-interpreter/memory) **and** control plane |
+| `bedrock-mantle:*` | "Bedrock Powered by AWS Mantle" — the OpenAI/Anthropic-compatible inference endpoint |
+
+This is unconditional and independent of `bedrock.enabled` (which only sets the
+app-level `ENABLE_BEDROCK_API` env var + the in-VPC Bedrock endpoint). The grant
+lives in `lib/constructs/agentcore-access.ts`.
 
 You can set any additional Open WebUI variable by extending the `environment` map in
 `lib/compute-stack.ts` — but most operational settings are configurable at runtime in the

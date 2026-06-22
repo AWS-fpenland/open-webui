@@ -92,9 +92,15 @@ for the full reference. The headline knobs:
 | `image.source` | `registry` | `registry` = official prebuilt image; `build` = build this repo's Dockerfile |
 | `image.tag` | `v0.9.6` | Pinned Open WebUI version (never `:main`) |
 | `auth.mode` | `none` | `none` = built-in auth; `cognito` = add Cognito SSO |
-| `bedrock.enabled` | `false` | Grant Bedrock IAM + set `ENABLE_BEDROCK_API` (requires Bedrock code in the image) |
+| `bedrock.enabled` | `false` | Set `ENABLE_BEDROCK_API` + add the VPC Bedrock endpoint (requires Bedrock code in the image) |
 | `websocket.enabled` | `true` | Native WebSocket over the VPC origin + Redis Socket.IO manager |
 | `environments` | one `default` env | Map of env name → sizing/domain; drives multi-env pipelines |
+
+> **IAM note:** The ECS task role is granted full access to `bedrock:*`,
+> `bedrock-agentcore:*`, and `bedrock-mantle:*` on **every** deployment path,
+> independent of `bedrock.enabled`. (`bedrock.enabled` only toggles the app-level
+> `ENABLE_BEDROCK_API` env var and the in-VPC Bedrock interface endpoint.) See
+> `cdk/lib/constructs/agentcore-access.ts`.
 
 Example config files live in [`cdk/config/`](cdk/config/):
 - `defaults.json` — pristine one-click (loaded automatically)
