@@ -1,0 +1,38 @@
+{
+  "_comment": "Mode 2 — single-environment CI/CD pipeline. Wires a CodePipeline to a Git repo (via a CodeStar Connection) that deploys ONE environment on every push. Replace connectionArn/repoOwner/repoName and (optionally) the domain. Deploy with: npx cdk deploy OpenWebUI-Pipeline -c configFile=config/example-single-pipeline.json",
+  "appName": "OpenWebUI",
+  "image": {
+    "source": "registry",
+    "registry": "ghcr.io/open-webui/open-webui",
+    "tag": "v0.9.6"
+  },
+  "auth": { "mode": "none" },
+  "bedrock": { "enabled": false },
+  "websocket": { "enabled": true },
+  "environments": {
+    "prod": {
+      "fargateCpu": 2048,
+      "fargateMemory": 4096,
+      "ecsDesiredCount": 2,
+      "ecsMinCapacity": 2,
+      "ecsMaxCapacity": 10,
+      "enableAutoScaling": true,
+      "auroraMinCapacity": 0.5,
+      "auroraMaxCapacity": 8,
+      "auroraDeletionProtection": true,
+      "maxAzs": 2,
+      "natGateways": 2
+    }
+  },
+  "pipeline": {
+    "enabled": true,
+    "connectionArn": "arn:aws:codestar-connections:us-east-1:111122223333:connection/REPLACE-ME",
+    "repoOwner": "your-org",
+    "repoName": "open-webui",
+    "branch": "main",
+    "approvalEmail": "you@example.com",
+    "stages": [
+      { "environment": "prod", "smokeTest": true }
+    ]
+  }
+}

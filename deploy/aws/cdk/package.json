@@ -1,0 +1,26 @@
+{
+  "name": "open-webui-aws-cdk",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Additive AWS CDK deployment infrastructure for Open WebUI (ECS Fargate + CloudFront VPC origin)",
+  "bin": {
+    "open-webui-aws": "bin/app.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "synth": "cdk synth",
+    "cdk": "cdk"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "aws-cdk": "^2.1118.0",
+    "ts-node": "^10.9.2",
+    "typescript": "~5.7.0"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.244.0",
+    "constructs": "^10.5.1",
+    "source-map-support": "^0.5.21"
+  }
+}

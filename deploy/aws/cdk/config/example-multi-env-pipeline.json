@@ -1,0 +1,66 @@
+{
+  "_comment": "Mode 3 — flexible multi-environment pipeline. dev deploys automatically; staging and prod each gate behind a manual approval. Add/remove/rename environments and stages freely (e.g. add 'test' between dev and staging). Deploy with: npx cdk deploy OpenWebUI-Pipeline -c configFile=config/example-multi-env-pipeline.json",
+  "appName": "OpenWebUI",
+  "image": {
+    "source": "registry",
+    "registry": "ghcr.io/open-webui/open-webui",
+    "tag": "v0.9.6"
+  },
+  "auth": { "mode": "none" },
+  "bedrock": { "enabled": false },
+  "websocket": { "enabled": true },
+  "environments": {
+    "dev": {
+      "fargateCpu": 1024,
+      "fargateMemory": 2048,
+      "ecsDesiredCount": 1,
+      "ecsMinCapacity": 1,
+      "ecsMaxCapacity": 1,
+      "enableAutoScaling": false,
+      "auroraMinCapacity": 0.5,
+      "auroraMaxCapacity": 2,
+      "auroraDeletionProtection": false,
+      "maxAzs": 2,
+      "natGateways": 1
+    },
+    "staging": {
+      "fargateCpu": 1024,
+      "fargateMemory": 2048,
+      "ecsDesiredCount": 1,
+      "ecsMinCapacity": 1,
+      "ecsMaxCapacity": 4,
+      "enableAutoScaling": true,
+      "auroraMinCapacity": 0.5,
+      "auroraMaxCapacity": 4,
+      "auroraDeletionProtection": false,
+      "maxAzs": 2,
+      "natGateways": 2
+    },
+    "prod": {
+      "fargateCpu": 2048,
+      "fargateMemory": 4096,
+      "ecsDesiredCount": 2,
+      "ecsMinCapacity": 2,
+      "ecsMaxCapacity": 10,
+      "enableAutoScaling": true,
+      "auroraMinCapacity": 1,
+      "auroraMaxCapacity": 16,
+      "auroraDeletionProtection": true,
+      "maxAzs": 3,
+      "natGateways": 3
+    }
+  },
+  "pipeline": {
+    "enabled": true,
+    "connectionArn": "arn:aws:codestar-connections:us-east-1:111122223333:connection/REPLACE-ME",
+    "repoOwner": "your-org",
+    "repoName": "open-webui",
+    "branch": "main",
+    "approvalEmail": "you@example.com",
+    "stages": [
+      { "environment": "dev", "smokeTest": true },
+      { "environment": "staging", "manualApprovalBefore": true, "smokeTest": true },
+      { "environment": "prod", "manualApprovalBefore": true, "smokeTest": true }
+    ]
+  }
+}

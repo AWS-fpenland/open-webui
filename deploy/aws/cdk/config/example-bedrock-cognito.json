@@ -1,0 +1,33 @@
+{
+  "_comment": "Opt-in advanced example — Amazon Bedrock as a model provider + Cognito SSO, building the image from this repo's source tree (the fork use-case). Requires Bedrock provider code in the image being built; vanilla Open WebUI does not ship a Bedrock router. Deploy with: npx cdk deploy --all -c configFile=config/example-bedrock-cognito.json",
+  "appName": "OpenWebUI",
+  "image": {
+    "source": "build"
+  },
+  "auth": { "mode": "cognito" },
+  "bedrock": {
+    "enabled": true,
+    "region": "us-east-1",
+    "allowedModels": []
+  },
+  "websocket": { "enabled": true },
+  "features": {
+    "agentcoreWebsocket": false
+  },
+  "environments": {
+    "default": {
+      "fargateCpu": 2048,
+      "fargateMemory": 4096,
+      "ecsDesiredCount": 1,
+      "ecsMinCapacity": 1,
+      "ecsMaxCapacity": 6,
+      "enableAutoScaling": true,
+      "auroraMinCapacity": 0.5,
+      "auroraMaxCapacity": 8,
+      "auroraDeletionProtection": true,
+      "maxAzs": 2,
+      "natGateways": 2
+    }
+  },
+  "pipeline": { "enabled": false, "stages": [] }
+}

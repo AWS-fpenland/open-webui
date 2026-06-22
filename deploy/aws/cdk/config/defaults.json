@@ -1,0 +1,28 @@
+{
+  "appName": "OpenWebUI",
+  "image": {
+    "source": "registry",
+    "registry": "ghcr.io/open-webui/open-webui",
+    "tag": "v0.9.6"
+  },
+  "auth": { "mode": "none" },
+  "bedrock": { "enabled": false },
+  "websocket": { "enabled": true },
+  "features": {},
+  "environments": {
+    "default": {
+      "fargateCpu": 1024,
+      "fargateMemory": 2048,
+      "ecsDesiredCount": 1,
+      "ecsMinCapacity": 1,
+      "ecsMaxCapacity": 4,
+      "enableAutoScaling": true,
+      "auroraMinCapacity": 0.5,
+      "auroraMaxCapacity": 4,
+      "auroraDeletionProtection": false,
+      "maxAzs": 2,
+      "natGateways": 2
+    }
+  },
+  "pipeline": { "enabled": false, "stages": [] }
+}
